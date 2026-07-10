@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="112" fill="#090a10"/>
+  <!-- 1a Master Mark: Rounded square outline in slate blue-grey with smaller solid orange rounded square drifting out of bottom-right -->
+  <rect x="120" y="120" width="220" height="220" rx="36" fill="none" stroke="#3a4160" stroke-width="24"/>
+  <rect x="250" y="250" width="140" height="140" rx="24" fill="#ff4522"/>
+</svg>

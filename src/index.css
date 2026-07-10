@@ -1,0 +1,115 @@
+@import "leaflet/dist/leaflet.css";
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --color-accent: #ff4522;
+}
+
+@layer base {
+  body {
+    background-color: #090a10;
+    color: #ffffff;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+/* Custom Leaflet style overrides to fit the ultra-dark, high-contrast theme */
+.leaflet-container {
+  background: #0b0c12 !important;
+  color: #12131a !important;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: #fdfaf4 !important;
+  color: #12131a !important;
+  border-radius: 8px !important;
+}
+
+.leaflet-popup-content {
+  font-family: "Space Grotesk", sans-serif !important;
+  font-size: 0.85rem !important;
+}
+
+.leaflet-bar {
+  border: 1px solid #25293a !important;
+}
+
+.leaflet-bar a {
+  background-color: #11131f !important;
+  color: #b7bdd5 !important;
+  border-bottom: 1px solid #25293a !important;
+}
+
+.leaflet-bar a:hover {
+  background-color: #ff4522 !important;
+  color: #ffffff !important;
+}
+
+@keyframes compass-shake {
+  0%, 100% { transform: rotate(var(--bearing-deg)) scale(1); }
+  25% { transform: rotate(calc(var(--bearing-deg) - 14deg)) scale(1.1); }
+  75% { transform: rotate(calc(var(--bearing-deg) + 14deg)) scale(1.1); }
+}
+
+.animate-compass-shake {
+  animation: compass-shake 0.25s infinite ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+@keyframes map-shimmer {
+  0% {
+    transform: translateX(-150%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(150%);
+  }
+}
+
+.animate-map-shimmer {
+  animation: map-shimmer 2s infinite ease-in-out;
+}
+
+/* Radar Sweep Scan Animation */
+@keyframes radar-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-radar-sweep {
+  animation: radar-sweep 5s linear infinite;
+}
+
+/* Pulsing Lock-On Target Frame */
+@keyframes target-pulse {
+  0%, 100% {
+    border-color: rgba(76, 196, 126, 0.4);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+  50% {
+    border-color: rgba(76, 196, 126, 1);
+    box-shadow: 0 0 15px 3px rgba(76, 196, 126, 0.25);
+  }
+}
+
+.animate-target-pulse {
+  animation: target-pulse 1.8s infinite ease-in-out;
+}
+

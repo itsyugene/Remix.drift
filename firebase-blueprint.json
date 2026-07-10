@@ -1,0 +1,112 @@
+{
+  "entities": {
+    "user": {
+      "title": "User Profile",
+      "description": "Public profile and authentication mapping for a user",
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "description": "User's full display name"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "User's email address"
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "URL to the user's Google profile picture"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp of the user account"
+        }
+      },
+      "required": ["email", "createdAt"]
+    },
+    "feedback": {
+      "title": "Place Feedback",
+      "description": "Vote and comment annotations for a specific OpenStreetMap venue",
+      "type": "object",
+      "properties": {
+        "osmType": {
+          "type": "string",
+          "enum": ["node", "way", "relation"],
+          "description": "OSM object type"
+        },
+        "osmId": {
+          "type": "number",
+          "description": "OSM entity identifier"
+        },
+        "placeName": {
+          "type": "string",
+          "description": "The name of the spot at the time of voting"
+        },
+        "vote": {
+          "type": "string",
+          "enum": ["up", "down"],
+          "description": "Thumbs up ('up') or Thumbs down ('down') vote"
+        },
+        "comment": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Optional short comment about suitability"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the vote or comment was last updated"
+        }
+      },
+      "required": ["osmType", "osmId", "vote", "updatedAt"]
+    },
+    "recentSearch": {
+      "title": "Recent Search",
+      "description": "A geocoded query visited by the user",
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "The input text entered by the user"
+        },
+        "label": {
+          "type": "string",
+          "description": "The main city or location name"
+        },
+        "region": {
+          "type": "string",
+          "description": "The administrative region or country"
+        },
+        "lat": {
+          "type": "number",
+          "description": "Latitude coordinate"
+        },
+        "lng": {
+          "type": "number",
+          "description": "Longitude coordinate"
+        },
+        "timestamp": {
+          "type": "number",
+          "description": "Epoch timestamp of when the search was executed"
+        }
+      },
+      "required": ["query", "label", "lat", "lng", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "user",
+      "description": "Individual user accounts containing general metadata"
+    },
+    "/users/{userId}/feedbacks/{feedbackId}": {
+      "schema": "feedback",
+      "description": "Private place suitability reviews and votes curated by the user"
+    },
+    "/users/{userId}/recentSearches/{searchId}": {
+      "schema": "recentSearch",
+      "description": "Geographical search queries made by the user, ordered by time"
+    }
+  }
+}

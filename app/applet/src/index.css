@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Custom leaflet scrollbar and maps style */
+.leaflet-container {
+  background: #0f172a !important; /* matches slate-900 */
+}
+
+.leaflet-bar {
+  border: none !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+}
+
+.leaflet-bar a {
+  background-color: #1e293b !important; /* slate-800 */
+  color: #94a3b8 !important; /* slate-400 */
+  border-bottom: 1px solid #334155 !important; /* slate-700 */
+  transition: all 0.2s ease;
+}
+
+.leaflet-bar a:hover {
+  background-color: #334155 !important; /* slate-700 */
+  color: #f1f5f9 !important; /* slate-100 */
+}
+
+/* Hide leaflet attribution on small screens */
+@media (max-width: 640px) {
+  .leaflet-control-attribution {
+    display: none !important;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
