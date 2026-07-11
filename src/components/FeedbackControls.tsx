@@ -29,7 +29,7 @@ export function FeedbackControls({ osmType, osmId, placeName, onChange }: Props)
     "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[0.66rem] font-mono font-bold uppercase tracking-wide transition-colors cursor-pointer";
 
   return (
-    <div className="mt-3 pt-3 border-t border-dashed border-[#d8d2bf]">
+    <div className="mt-3 pt-3 border-t border-dashed border-[#25293A]">
       <div className="flex items-center gap-2 flex-wrap">
         <button
           type="button"
@@ -38,8 +38,8 @@ export function FeedbackControls({ osmType, osmId, placeName, onChange }: Props)
           aria-label={`Thumbs up for ${placeName}`}
           className={`${thumbBase} ${
             feedback?.vote === "up"
-              ? "border-[#1f8a4c] bg-[#e2f2e8] text-[#1f8a4c]"
-              : "border-[#d3ceb7] text-[#7a7e8d] hover:border-[#1f8a4c] hover:text-[#1f8a4c]"
+              ? "border-[#2EC4B6] bg-[#2EC4B6]/10 text-[#2EC4B6]"
+              : "border-[#25293A] text-[#7E84A3] hover:border-[#2EC4B6] hover:text-[#2EC4B6]"
           }`}
         >
           <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 10v12M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg>
@@ -52,14 +52,14 @@ export function FeedbackControls({ osmType, osmId, placeName, onChange }: Props)
           aria-label={`Thumbs down for ${placeName}`}
           className={`${thumbBase} ${
             feedback?.vote === "down"
-              ? "border-[#b3402f] bg-[#f7e2dc] text-[#b3402f]"
-              : "border-[#d3ceb7] text-[#7a7e8d] hover:border-[#b3402f] hover:text-[#b3402f]"
+              ? "border-[#E71D36] bg-[#E71D36]/10 text-[#E71D36]"
+              : "border-[#25293A] text-[#7E84A3] hover:border-[#E71D36] hover:text-[#E71D36]"
           }`}
         >
           <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 14V2M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z"/></svg>
           Skip it
         </button>
-        <span className="text-[0.62rem] font-mono text-[#a39e8b]">this device only</span>
+        <span className="text-[0.62rem] font-mono text-[#7E84A3]">this device only</span>
       </div>
 
       {feedback && (
@@ -71,7 +71,7 @@ export function FeedbackControls({ osmType, osmId, placeName, onChange }: Props)
           maxLength={200}
           placeholder={feedback.vote === "down" ? "Why skip? e.g. construction, closed down..." : "What made it good? (optional)"}
           aria-label={`Optional comment about ${placeName}`}
-          className="mt-2 w-full rounded-lg border border-[#d3ceb7] bg-white px-2.5 py-2 text-[0.82rem] text-[#12131a] outline-none focus:border-[#b3402f]"
+          className="mt-2 w-full rounded-lg border border-[#25293A] bg-[#10111A] px-2.5 py-2 text-[0.82rem] text-white outline-none focus:border-[#FF4522]"
         />
       )}
     </div>

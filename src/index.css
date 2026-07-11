@@ -113,3 +113,37 @@
   animation: target-pulse 1.8s infinite ease-in-out;
 }
 
+/* --- Step 7: Motion & Transitions --- */
+@keyframes staggerFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-stagger-fade {
+  animation: staggerFadeIn 200ms ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes logoDriftIn {
+  from { transform: translate(-4px, -4px); opacity: 0; }
+  to { transform: translate(0, 0); opacity: 1; }
+}
+
+.animate-logo-drift {
+  animation: logoDriftIn 300ms ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-stagger-fade,
+  .animate-logo-drift,
+  .animate-fadeIn,
+  .animate-compass-shake,
+  .animate-map-shimmer,
+  .animate-radar-sweep,
+  .animate-target-pulse,
+  .animate-marquee {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

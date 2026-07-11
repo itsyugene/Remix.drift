@@ -46,19 +46,19 @@ export default function PlaceCard({ place, userLat, userLng, deviceHeading, soun
 
   // Determine hours view properties
   let hoursText = "Hours not mapped in OSM";
-  let hoursColor = "text-neutral-500";
+  let hoursColor = "text-[#7E84A3]";
 
   if (hours.state === "open") {
     hoursText = hours.always ? "Open 24/7" : `Open — closes ${formatHM(hours.until || 0)}`;
-    hoursColor = "text-[#1f8a4c] font-semibold";
+    hoursColor = "text-[#2EC4B6] font-semibold";
   } else if (hours.state === "closed") {
     hoursText = hours.next !== null ? `Closed — opens ${formatHM(hours.next || 0)}` : "Closed today";
-    hoursColor = "text-[#b3402f] font-semibold";
+    hoursColor = "text-[#E71D36] font-semibold";
   } else if (hours.state === "unknown") {
     const rawHours = place.tags.opening_hours || "";
     const abbreviated = rawHours.length > 35 ? `${rawHours.slice(0, 32)}...` : rawHours;
     hoursText = `Hours: ${abbreviated} — unverified`;
-    hoursColor = "text-neutral-500 italic";
+    hoursColor = "text-[#7E84A3] italic";
   }
 
   const osmUrl = `https://www.openstreetmap.org/${place.osmType}/${place.osmId}`;
@@ -80,20 +80,20 @@ export default function PlaceCard({ place, userLat, userLng, deviceHeading, soun
 
   return (
     <article 
-      className={`mb-3.5 border-t-4 border-solid rounded-xl bg-[#fdfaf4] shadow-xl text-[#12131a] p-4 flex flex-col justify-between transition-all duration-300 ${
+      className={`mb-3.5 border rounded-[10px] bg-[#090A10] text-white p-4 hover:border-[#3A4160] flex flex-col justify-between transition-all duration-300 ${
         isPointedAt 
-          ? 'border-accent border-l border-r border-b border-[#4cc47e]/40 animate-target-pulse scale-[1.01]' 
-          : 'border-accent'
+          ? 'border-[#FF4522] scale-[1.01]' 
+          : 'border-[#25293A]'
       } ${isSkipped ? 'opacity-[0.72]' : ''}`}
       id={`card-${place.key}`}
     >
       <div className="flex justify-between items-start gap-2.5">
         <div className="flex flex-col gap-1">
-          <h3 className={`font-bold text-base leading-tight ${place.named ? 'text-[#12131a]' : 'text-[#8a8576] italic'}`}>
+          <h3 className={`font-bold text-base leading-tight ${place.named ? 'text-white' : 'text-[#7E84A3] italic'}`}>
             {place.name}
           </h3>
           {isPointedAt && (
-            <span className="inline-flex items-center gap-1 text-[9px] font-mono font-extrabold uppercase tracking-wider text-[#1f8a4c] bg-[#1f8a4c]/10 px-2 py-0.5 rounded-full w-max animate-pulse">
+            <span className="inline-flex items-center gap-1 text-[9px] font-mono font-extrabold uppercase tracking-wider text-[#2EC4B6] bg-[#2EC4B6]/10 px-2 py-0.5 rounded-full w-max animate-pulse">
               🎯 Target Locked
             </span>
           )}
@@ -101,7 +101,7 @@ export default function PlaceCard({ place, userLat, userLng, deviceHeading, soun
         
         {/* Distance + rotating compass needle with calibration guide */}
         <div className="flex flex-col items-end gap-1.5 self-start">
-          <span className="flex items-center gap-1.5 py-1 px-2.5 rounded-full bg-[#e8e3d8] text-[#3a3b40] text-[11px] font-mono font-bold whitespace-nowrap">
+          <span className="flex items-center gap-1.5 py-1 px-2.5 rounded-full bg-[#10111A] text-[#B7BDD5] border border-[#25293A] text-[11px] font-mono font-bold whitespace-nowrap">
             <span 
               className="inline-block transition-transform duration-300"
               style={{ 
@@ -118,21 +118,21 @@ export default function PlaceCard({ place, userLat, userLng, deviceHeading, soun
       </div>
 
       <div className="flex flex-wrap items-center gap-2 mt-1.5">
-        <span className="text-[11px] font-bold tracking-wide uppercase text-neutral-500 font-mono">
+        <span className="text-[11px] font-bold tracking-wide uppercase text-[#7E84A3] font-mono">
           {place.typeLabel}
         </span>
         {place._morning && (
-          <span className="text-[10px] font-bold bg-[#fbe7c6] text-[#a8650a] px-2 py-0.5 rounded-full uppercase tracking-wider font-mono">
+          <span className="text-[10px] font-bold bg-[#ff9f1c]/10 text-[#ff9f1c] px-2 py-0.5 rounded-full uppercase tracking-wider font-mono">
             morning pick
           </span>
         )}
         {isSkipped && (
-          <span className="text-[10px] font-bold bg-[#f7e2dc] text-[#b3402f] px-2 py-0.5 rounded-full uppercase tracking-wider font-mono">
+          <span className="text-[10px] font-bold bg-[#E71D36]/10 text-[#E71D36] px-2 py-0.5 rounded-full uppercase tracking-wider font-mono">
             skipped
           </span>
         )}
         {isGoodDrift && (
-          <span className="text-[10px] font-bold bg-[#e2f2e8] text-[#1f8a4c] px-2 py-0.5 rounded-full uppercase tracking-wider font-mono">
+          <span className="text-[10px] font-bold bg-[#2EC4B6]/10 text-[#2EC4B6] px-2 py-0.5 rounded-full uppercase tracking-wider font-mono">
             good drift
           </span>
         )}
@@ -141,10 +141,10 @@ export default function PlaceCard({ place, userLat, userLng, deviceHeading, soun
       <p className={`text-xs mt-1.5 font-sans ${hoursColor}`}>{hoursText}</p>
       
       {place.subTags && (
-        <p className="text-[11px] text-neutral-500 mt-1 font-mono break-words">{place.subTags}</p>
+        <p className="text-[11px] text-[#7E84A3] mt-1 font-mono break-words">{place.subTags}</p>
       )}
 
-      <div className="flex flex-wrap items-center gap-4 mt-3 pb-3 border-b border-dashed border-neutral-300 font-mono text-xs">
+      <div className="flex flex-wrap items-center gap-4 mt-3 pb-3 border-b border-dashed border-[#25293A] font-mono text-xs">
         <a 
           href={osmUrl} 
           target="_blank" 
@@ -167,10 +167,10 @@ export default function PlaceCard({ place, userLat, userLng, deviceHeading, soun
             hapticFeedback.light();
             window.location.href = mailtoUrl;
           }}
-          className="group text-neutral-500 hover:text-[#ff4522] hover:bg-[#ff4522]/5 px-2.5 py-1 rounded-md border border-neutral-300 hover:border-[#ff4522]/30 text-[10px] ml-auto font-extrabold uppercase tracking-wider transition-all duration-200 cursor-pointer flex items-center gap-1 active:scale-95"
+          className="group text-[#7E84A3] hover:text-[#ff4522] hover:bg-[#ff4522]/5 px-2.5 py-1 rounded-md border border-[#25293A] hover:border-[#ff4522]/30 text-[10px] ml-auto font-extrabold uppercase tracking-wider transition-all duration-200 cursor-pointer flex items-center gap-1 active:scale-95"
           title={`Report incorrect data or issues for ${place.name || 'Unnamed Spot'} (OSM ID: ${place.osmId})`}
         >
-          <AlertTriangle className="w-3.5 h-3.5 text-neutral-400 group-hover:text-[#ff4522]" />
+          <AlertTriangle className="w-3.5 h-3.5 text-[#7E84A3] group-hover:text-[#ff4522]" />
           <span>Report incorrect data</span>
         </button>
       </div>

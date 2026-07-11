@@ -814,14 +814,8 @@ export default function App() {
   const error = status === 'error';
 
   return (
-    <div className="relative min-h-screen flex flex-col justify-start items-center overflow-hidden px-4 pt-[env(safe-area-inset-top,18px)] pb-[env(safe-area-inset-bottom,40px)] bg-gradient-to-b from-[#090a10] to-[#10111a] text-white">
-      {/* Decorative ambient glowing circles */}
-      <div 
-        className="absolute z-0 top-[-120px] left-1/2 -translate-x-1/2 w-[420px] max-w-[92vw] h-[300px] pointer-events-none rounded-full blur-[70px] opacity-40 transition-colors duration-500"
-        style={{
-          background: `radial-gradient(circle, ${activeCategory.color} 35%, transparent 70%)`
-        }}
-      />
+    <div className="relative min-h-screen flex flex-col justify-start items-center overflow-hidden px-4 pt-[env(safe-area-inset-top,18px)] pb-[env(safe-area-inset-bottom,40px)] bg-[#10111A] text-white">
+      {/* Ambient glow removed — flat design */}
 
       <div className="relative z-10 w-full max-w-[520px] md:max-w-4xl lg:max-w-6xl flex flex-col transition-all duration-300">
         {/* Header */}
@@ -866,7 +860,7 @@ export default function App() {
               {/* 1a Brand Mark: map tile sliding/drifting */}
               <div className="relative w-8 h-8 flex items-center justify-center">
                 <div className="absolute w-5.5 h-5.5 border-2 border-[#3A4160] rounded-md" />
-                <div className="absolute w-3 h-3 bg-[#FF4522] rounded-[2px] right-0.5 bottom-0.5 shadow-md shadow-[#FF4522]/40" />
+                <div className="absolute w-3 h-3 bg-[#FF4522] rounded-[2px] right-0.5 bottom-0.5 animate-logo-drift" />
               </div>
 
               {/* 1d Wordmark: "DRIFT" with orange "I" acting as 'you are here' indicator */}
@@ -1047,11 +1041,12 @@ export default function App() {
                     hapticFeedback.light();
                     setCurrentTab(cat.id);
                   }}
-                  className={`min-h-[52px] flex flex-col items-center justify-center gap-1 rounded-xl border text-[11.5px] font-mono font-extrabold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
+                  className={`min-h-[52px] flex flex-col items-center justify-center gap-1 rounded-full border text-[11.5px] font-mono font-extrabold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
                     selected 
-                      ? `${cat.border} bg-[#11131f] ${cat.text}` 
-                      : 'border-[#25293a] bg-[#11131f] text-[#7e84a3] hover:text-white hover:border-[#5b6075]'
+                      ? 'border-transparent text-[#090A10] font-black' 
+                      : 'border-[#25293a] bg-transparent text-[#7e84a3] hover:text-white hover:border-[#5b6075]'
                   } ${cat.outline}`}
+                  style={{ backgroundColor: selected ? cat.color : 'transparent' }}
                 >
                   {(() => {
                     const IconComponent = cat.icon;
@@ -1575,15 +1570,20 @@ export default function App() {
           {/* Cards List */}
           {hasLocation && !loading && !error && visibleShown.length > 0 && (
             <div className="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {visibleShown.map((place) => (
-                <PlaceCard 
+              {visibleShown.map((place, index) => (
+                <div
                   key={`${place.key}-${feedbackUpdateTrigger}`}
-                  place={place} 
-                  userLat={lat!} 
-                  userLng={lng!} 
-                  deviceHeading={deviceHeading}
-                  onChange={handleFeedbackChange}
-                />
+                  className="animate-stagger-fade"
+                  style={{ animationDelay: `${index * 30}ms` }}
+                >
+                  <PlaceCard 
+                    place={place} 
+                    userLat={lat!} 
+                    userLng={lng!} 
+                    deviceHeading={deviceHeading}
+                    onChange={handleFeedbackChange}
+                  />
+                </div>
               ))}
             </div>
           )}
@@ -1710,7 +1710,7 @@ export default function App() {
                     localStorage.setItem('drift_onboarded', 'true');
                   }
                 }}
-                className="px-5 py-2.5 bg-[#ff4522] hover:bg-[#ff5c3d] text-white font-sans font-bold text-xs rounded-xl transition-all shadow-[0_4px_15px_rgba(255,69,34,0.3)] cursor-pointer active:scale-95"
+                className="px-5 py-2.5 bg-[#ff4522] hover:bg-[#ff5c3d] text-white font-sans font-bold text-xs rounded-xl transition-all cursor-pointer active:scale-95"
               >
                 {onboardingStep === 3 ? 'Get Drifting!' : 'Next'}
               </button>
@@ -1861,7 +1861,7 @@ export default function App() {
                   hapticFeedback.light();
                   setShowBrandDeck(false);
                 }}
-                className="px-5 py-2.5 bg-[#ff4522] hover:bg-[#ff5c3d] text-white font-sans font-bold text-xs rounded-xl transition-all shadow-[0_4px_15px_rgba(255,69,34,0.3)] cursor-pointer active:scale-95"
+                className="px-5 py-2.5 bg-[#ff4522] hover:bg-[#ff5c3d] text-white font-sans font-bold text-xs rounded-xl transition-all cursor-pointer active:scale-95"
               >
                 Close Showroom
               </button>
