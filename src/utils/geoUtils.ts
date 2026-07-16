@@ -68,19 +68,23 @@ export function getCategories(tags: Record<string, string>): string[] {
     cats.push("chill");
   }
 
-  // Thrill (represented by Rocket) — Massage parlours, Brothels, Casinos, Sex Shops, Strip Clubs, Love Hotels, Cabarets, Swinger Clubs, Adult Gaming Centres, Coffeeshops, Cannabis Shops. NO PUBS, NO BARS.
+  // Leak — public toilets only.
+  if (amenity === "toilets") {
+    cats.push("leak");
+  }
+
+  // Thrill (represented by Rocket) — nightlife AND adult venues combined:
+  // pubs, bars, nightclubs, strip clubs, brothels, casinos, love hotels,
+  // cabarets, swinger clubs, adult gaming centres, sex/erotic/adult/cannabis
+  // shops, coffeeshops, and NAMED massage parlours (OSM has no ratings, so a
+  // name is the only quality signal - unnamed shop=massage is dropped).
   if (
-    ["brothel", "strip_club", "stripclub", "love_hotel", "lovehotel", "cabaret", "swinger_club", "swingerclub", "coffeeshop", "casino"].includes(amenity) ||
+    ["pub", "bar", "nightclub", "brothel", "strip_club", "stripclub", "love_hotel", "lovehotel", "cabaret", "swinger_club", "swingerclub", "coffeeshop", "casino"].includes(amenity) ||
     ["casino", "gambling", "adult_gaming_centre"].includes(leisure) ||
     ["sex", "erotic", "adult", "cannabis", "marijuana", "coffeeshop"].includes(shop) ||
     (shop === "massage" && hasName(tags))
   ) {
     cats.push("thrill");
-  }
-
-  // Dilate — pubs, bars, nightclubs
-  if (["pub", "bar", "nightclub"].includes(amenity)) {
-    cats.push("dilate");
   }
 
   return cats;

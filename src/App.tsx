@@ -25,7 +25,7 @@ import {
   Radio,
   Coffee,
   Trees,
-  Sparkles,
+  Droplet,
   Rocket,
   Activity,
   Wifi,
@@ -46,7 +46,7 @@ import { getFeedback } from './lib/feedback.ts';
 const CATEGORIES = [
   { id: 'food', label: 'Food', color: '#ff9f1c', bg: 'bg-[#ff9f1c]', text: 'text-[#ff9f1c]', border: 'border-[#ff9f1c]', hover: 'hover:border-[#ff9f1c]', outline: 'focus:outline-[#ff9f1c]', icon: Coffee },
   { id: 'chill', label: 'Chill', color: '#2ec4b6', bg: 'bg-[#2ec4b6]', text: 'text-[#2ec4b6]', border: 'border-[#2ec4b6]', hover: 'hover:border-[#2ec4b6]', outline: 'focus:outline-[#2ec4b6]', icon: Trees },
-  { id: 'dilate', label: 'Dilate', color: '#8d4bff', bg: 'bg-[#8d4bff]', text: 'text-[#8d4bff]', border: 'border-[#8d4bff]', hover: 'hover:border-[#8d4bff]', outline: 'focus:outline-[#8d4bff]', icon: Sparkles },
+  { id: 'leak', label: 'Leak', color: '#38bdf8', bg: 'bg-[#38bdf8]', text: 'text-[#38bdf8]', border: 'border-[#38bdf8]', hover: 'hover:border-[#38bdf8]', outline: 'focus:outline-[#38bdf8]', icon: Droplet },
   { id: 'thrill', label: 'Thrill', color: '#ff4522', bg: 'bg-[#ff4522]', text: 'text-[#ff4522]', border: 'border-[#ff4522]', hover: 'hover:border-[#ff4522]', outline: 'focus:outline-[#ff4522]', icon: Rocket }
 ] as const;
 
@@ -1538,14 +1538,14 @@ export default function App() {
                 <>
                   <p className="text-sm font-bold text-white mb-1">No thrill spots nearby</p>
                   <p className="text-xs text-[#7e84a3] max-w-[340px] mx-auto leading-relaxed">
-                    No massage parlours, brothels, casinos, adult/sex shops, coffeeshops, or cannabis shops mapped nearby - a sparse-data gap, not a guarantee.
+                    No pubs, bars, nightclubs, strip clubs, brothels, casinos, massage parlours, adult/sex shops, coffeeshops, or cannabis shops mapped nearby - a sparse-data gap, not a guarantee.
                   </p>
                 </>
-              ) : currentTab === 'dilate' ? (
+              ) : currentTab === 'leak' ? (
                 <>
-                  <p className="text-sm font-bold text-white mb-1">No dilate spots nearby</p>
+                  <p className="text-sm font-bold text-white mb-1">No leak spots nearby</p>
                   <p className="text-xs text-[#7e84a3] max-w-[340px] mx-auto leading-relaxed">
-                    No pubs, nightclubs, or bars mapped nearby - a sparse-data gap, not a guarantee.
+                    No public toilets mapped nearby - a sparse-data gap, not a guarantee.
                   </p>
                 </>
               ) : (
@@ -1643,7 +1643,7 @@ export default function App() {
               <div className="flex flex-col gap-1.5">
                 <h3 className="font-sans font-bold text-lg text-white">1. Select Your Vibe</h3>
                 <p className="text-sm text-[#b7bdd5] leading-relaxed">
-                  Toggle between <strong className="text-white">Food</strong>, <strong className="text-white">Chill</strong>, <strong className="text-white">Leak</strong>, and <strong className="text-white">Dilate</strong> to filter local spots. The sorting dynamically adapts depending on morning or evening hours!
+                  Toggle between <strong className="text-white">Food</strong>, <strong className="text-white">Chill</strong>, <strong className="text-white">Leak</strong>, and <strong className="text-white">Thrill</strong> to filter local spots. The sorting dynamically adapts depending on morning or evening hours!
                 </p>
               </div>
             )}
