@@ -13,5 +13,5 @@ services:
     # NODE_ENV=production, which would otherwise skip the build tooling.
     buildCommand: npm install --include=dev && npm run build
     startCommand: npm start
-    healthCheckPath: /api/test-connection
+    healthCheckPath: /
     autoDeploy: true
