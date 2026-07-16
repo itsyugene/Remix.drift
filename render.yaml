@@ -1,0 +1,17 @@
+# Render deployment blueprint for DRIFT.
+# Connect this repo once at https://render.com (New > Blueprint), and every
+# push to `main` auto-deploys. The Express server (server.ts) serves the built
+# Vite frontend from dist/ AND the /api geocode + Overpass proxy on one port.
+services:
+  - type: web
+    name: remix-drift
+    runtime: node
+    plan: free
+    region: frankfurt
+    branch: main
+    # --include=dev forces devDependencies (vite) even if the host defaults
+    # NODE_ENV=production, which would otherwise skip the build tooling.
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/test-connection
+    autoDeploy: true
