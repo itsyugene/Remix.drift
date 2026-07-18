@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import { Place } from '../types.ts';
-import { Plus, Minus, Compass, Navigation } from 'lucide-react';
+import { Plus, Minus, Navigation } from 'lucide-react';
 import { hapticFeedback } from '../utils/haptic.ts';
 
 interface DriftMapProps {
@@ -10,20 +10,16 @@ interface DriftMapProps {
   radius: number;
   places: Place[];
   accentColor: string;
-  deviceHeading: number | null;
   isCollapsed?: boolean;
-  onResetCompass?: () => void;
 }
 
-export default function DriftMap({ 
-  lat, 
-  lng, 
-  radius, 
-  places, 
-  accentColor, 
-  deviceHeading, 
-  isCollapsed = false,
-  onResetCompass
+export default function DriftMap({
+  lat,
+  lng,
+  radius,
+  places,
+  accentColor,
+  isCollapsed = false
 }: DriftMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -139,34 +135,12 @@ export default function DriftMap({
       interactive: false,
     }).addTo(markerGroup);
 
-    // 2. Draw user center dot with rotating compass heading cone if available
-    const hasHeading = deviceHeading !== null && deviceHeading !== undefined;
-    const rotateStyle = hasHeading ? `transform: rotate(${deviceHeading}deg);` : '';
+    // 2. Draw the user's origin dot (north-up map — no device-heading cone)
     const centerIcon = L.divIcon({
       className: '',
-      html: `
-        <div class="relative w-8 h-8 flex items-center justify-center">
-          ${hasHeading ? `
-            <div 
-              class="absolute inset-0 flex items-center justify-center pointer-events-none transition-transform duration-100" 
-              style="${rotateStyle}"
-            >
-              <!-- Translucent heading cone/pointer -->
-              <div 
-                class="absolute bottom-1/2 w-8 h-10 origin-bottom opacity-20"
-                style="background: conic-gradient(from 150deg at 50% 100%, ${accentColor} 0deg, transparent 60deg, transparent 300deg, ${accentColor} 360deg); clip-path: polygon(50% 0%, 0% 100%, 100% 100%);"
-              ></div>
-              <!-- Mini sharp pointer arrow -->
-              <div 
-                class="absolute bottom-1/2 -mb-0.5 w-0 h-0 border-l-[4px] border-r-[4px] border-b-[8px] border-l-transparent border-r-transparent border-b-[#ff4522]"
-              ></div>
-            </div>
-          ` : ''}
-          <div class="absolute w-3.5 h-3.5 rounded-full bg-[#ff4522] border-2 border-white shadow-[0_1px_4px_rgba(0,0,0,0.5)] z-10"></div>
-        </div>
-      `,
-      iconSize: [32, 32],
-      iconAnchor: [16, 16]
+      html: `<div class="w-3.5 h-3.5 rounded-full bg-[#ff4522] border-2 border-white shadow-[0_1px_4px_rgba(0,0,0,0.5)]"></div>`,
+      iconSize: [14, 14],
+      iconAnchor: [7, 7]
     });
     L.marker([lat, lng], { icon: centerIcon, interactive: false }).addTo(markerGroup);
 
@@ -190,7 +164,7 @@ export default function DriftMap({
         .addTo(markerGroup);
     });
 
-  }, [lat, lng, radius, places, accentColor, deviceHeading]);
+  }, [lat, lng, radius, places, accentColor]);
 
   const formatMeters = (m: number) => {
     if (m < 1000) return `${Math.round(m / 10) * 10}m`;
@@ -206,16 +180,6 @@ export default function DriftMap({
   const handleZoomOut = () => {
     if (mapRef.current) {
       mapRef.current.zoomOut();
-    }
-  };
-
-  const handleRecenterAndResetCompass = () => {
-    if (mapRef.current) {
-      const zoomLevel = radius <= 800 ? 15 : radius <= 2000 ? 14 : 13;
-      mapRef.current.setView([lat, lng], zoomLevel, { animate: true });
-    }
-    if (onResetCompass) {
-      onResetCompass();
     }
   };
 
@@ -289,36 +253,6 @@ export default function DriftMap({
         </button>
       </div>
 
-      {/* Floating North Reset / Compass Button Overlay */}
-      <button
-        type="button"
-        id="compass-reset-button"
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          hapticFeedback.light();
-          handleRecenterAndResetCompass();
-        }}
-        className="absolute top-[116px] right-3 z-30 w-9 h-9 flex items-center justify-center rounded-xl border bg-[#090a10]/95 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.65)] text-[#b7bdd5] hover:text-white transition-all cursor-pointer active:scale-95 group"
-        style={{
-          borderColor: `${accentColor}25`
-        }}
-        title="Reset Map to North & Center View"
-        aria-label="Reset Map to North and Center View"
-      >
-        <div 
-          className="relative w-5 h-5 flex items-center justify-center transition-transform duration-300"
-          style={{
-            transform: `rotate(${deviceHeading ? -deviceHeading : 0}deg)`
-          }}
-        >
-          {/* Compass Icon */}
-          <Compass className="w-5 h-5 text-accent transition-colors group-hover:text-white" style={{ color: accentColor }} />
-          {/* North Point Indicator Dot */}
-          <div className="absolute top-0 w-1 h-1 rounded-full bg-[#ff4522]" />
-        </div>
-      </button>
-
       {/* Floating Recenter Button Overlay */}
       <button
         type="button"
@@ -329,7 +263,7 @@ export default function DriftMap({
           hapticFeedback.light();
           handleRecenterOnly();
         }}
-        className={`absolute top-[160px] right-3 z-30 w-9 h-9 flex items-center justify-center rounded-xl border bg-[#090a10]/95 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.65)] transition-all cursor-pointer active:scale-95 group ${
+        className={`absolute top-[116px] right-3 z-30 w-9 h-9 flex items-center justify-center rounded-xl border bg-[#090a10]/95 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.65)] transition-all cursor-pointer active:scale-95 group ${
           isPannedAway 
             ? 'text-white border-[#2ec4b6] animate-pulse shadow-[0_0_12px_rgba(46,196,182,0.4)]' 
             : 'text-[#b7bdd5] hover:text-white'

@@ -84,16 +84,7 @@ export default function App() {
 
   const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
   const [onboardingStep, setOnboardingStep] = useState<number>(1);
-  const [showBrandDeck, setShowBrandDeck] = useState<boolean>(false);
 
-  const [deviceHeading, setDeviceHeading] = useState<number | null>(null);
-
-  const handleResetCompass = () => {
-    setDeviceHeading(0);
-  };
-
-  const [isCompassErratic, setIsCompassErratic] = useState<boolean>(false);
-  const [isSimulatingJitter, setIsSimulatingJitter] = useState<boolean>(false);
   const [isMapCollapsed, setIsMapCollapsed] = useState<boolean>(false);
   const [liveMode, setLiveMode] = useState<boolean>(false);
   const [showLiveTooltip, setShowLiveTooltip] = useState<boolean>(false);
@@ -152,147 +143,6 @@ export default function App() {
       setTestingConnection(false);
     }
   };
-
-  // Refs for tracking sensor behavior and smoothing orientation
-  const lastCosRef = useRef<number | null>(null);
-  const lastSinRef = useRef<number | null>(null);
-  const lastHeadingRef = useRef<{ heading: number; timestamp: number }[]>([]);
-  const lastErraticTimeRef = useRef<number>(0);
-  const isErraticRef = useRef<boolean>(false);
-
-  useEffect(() => {
-    const handleOrientation = (event: DeviceOrientationEvent) => {
-      // Ignore real sensor data if we are actively simulating jitter
-      if (isSimulatingJitter) return;
-
-      let heading: number | null = null;
-      
-      // Try iOS-specific heading
-      if ('webkitCompassHeading' in event) {
-        heading = (event as any).webkitCompassHeading;
-      } else if (event.alpha !== null) {
-        // Convert counter-clockwise alpha (0-360) to clockwise heading
-        heading = (360 - event.alpha) % 360;
-      }
-
-      if (heading === null || isNaN(heading)) return;
-
-      // Smooth out the heading using Exponential Moving Average on Cosine/Sine components
-      // This completely dampens fast fluctuations and prevents jerking/jitter!
-      const headingRad = (heading * Math.PI) / 180;
-      const currentCos = Math.cos(headingRad);
-      const currentSin = Math.sin(headingRad);
-
-      let smoothedCos = currentCos;
-      let smoothedSin = currentSin;
-
-      // Alpha value of 0.08 offers incredible stability while staying responsive
-      const alpha = 0.08; 
-      if (lastCosRef.current !== null && lastSinRef.current !== null) {
-        smoothedCos = lastCosRef.current * (1 - alpha) + currentCos * alpha;
-        smoothedSin = lastSinRef.current * (1 - alpha) + currentSin * alpha;
-      }
-
-      lastCosRef.current = smoothedCos;
-      lastSinRef.current = smoothedSin;
-
-      let smoothedHeadingRad = Math.atan2(smoothedSin, smoothedCos);
-      let smoothedHeadingDeg = (smoothedHeadingRad * 180) / Math.PI;
-      smoothedHeadingDeg = (smoothedHeadingDeg + 360) % 360;
-
-      setDeviceHeading(smoothedHeadingDeg);
-
-      // Sensor jitter analysis in background (kept in backend)
-      const now = Date.now();
-      const history = lastHeadingRef.current;
-      history.push({ heading, timestamp: now });
-
-      const cutoff = now - 1500;
-      while (history.length > 0 && history[0].timestamp < cutoff) {
-        history.shift();
-      }
-
-      if (history.length >= 4) {
-        let suddenJumps = 0;
-        for (let i = 1; i < history.length; i++) {
-          const prev = history[i - 1];
-          const curr = history[i];
-          const dt = curr.timestamp - prev.timestamp;
-
-          let diff = Math.abs(curr.heading - prev.heading);
-          if (diff > 180) diff = 360 - diff;
-
-          if (diff > 20 && dt < 120) {
-            suddenJumps++;
-          }
-        }
-
-        if (suddenJumps >= 3) {
-          lastErraticTimeRef.current = now;
-          if (!isErraticRef.current) {
-            isErraticRef.current = true;
-            setIsCompassErratic(true);
-          }
-        } else {
-          if (isErraticRef.current && now - lastErraticTimeRef.current > 3000) {
-            isErraticRef.current = false;
-            setIsCompassErratic(false);
-          }
-        }
-      }
-    };
-
-    window.addEventListener('deviceorientation', handleOrientation);
-    window.addEventListener('deviceorientationabsolute', handleOrientation as any);
-
-    return () => {
-      window.removeEventListener('deviceorientation', handleOrientation);
-      window.removeEventListener('deviceorientationabsolute', handleOrientation as any);
-    };
-  }, [isSimulatingJitter]);
-
-  // Compass jitter simulation handler for desktop and testing (with background smoothing applied)
-  useEffect(() => {
-    if (!isSimulatingJitter) return;
-    
-    setIsCompassErratic(true);
-    let currentMockHeading = 180;
-    
-    const interval = setInterval(() => {
-      // Jitter heading randomly by -40 to +40 degrees
-      const change = (Math.random() * 80) - 40;
-      currentMockHeading = (currentMockHeading + change + 360) % 360;
-
-      // Apply smoothing component to mock data as well
-      const headingRad = (currentMockHeading * Math.PI) / 180;
-      const currentCos = Math.cos(headingRad);
-      const currentSin = Math.sin(headingRad);
-
-      let smoothedCos = currentCos;
-      let smoothedSin = currentSin;
-
-      const alpha = 0.08;
-      if (lastCosRef.current !== null && lastSinRef.current !== null) {
-        smoothedCos = lastCosRef.current * (1 - alpha) + currentCos * alpha;
-        smoothedSin = lastSinRef.current * (1 - alpha) + currentSin * alpha;
-      }
-
-      lastCosRef.current = smoothedCos;
-      lastSinRef.current = smoothedSin;
-
-      let smoothedHeadingRad = Math.atan2(smoothedSin, smoothedCos);
-      let smoothedHeadingDeg = (smoothedHeadingRad * 180) / Math.PI;
-      smoothedHeadingDeg = (smoothedHeadingDeg + 360) % 360;
-
-      setDeviceHeading(smoothedHeadingDeg);
-    }, 120);
-
-    return () => {
-      clearInterval(interval);
-      setIsCompassErratic(false);
-      setDeviceHeading(null);
-    };
-  }, [isSimulatingJitter]);
 
   useEffect(() => {
     try {
@@ -825,7 +675,7 @@ export default function App() {
       <div className="relative z-10 w-full max-w-[520px] md:max-w-4xl lg:max-w-6xl flex flex-col transition-all duration-300">
         {/* Header */}
         <header className="relative text-center mt-1.5 mb-4" role="banner">
-          {/* Help / Guide & Brand Showroom buttons */}
+          {/* Help / Guide button */}
           <div className="absolute left-1 top-1/2 -translate-y-1/2 flex items-center gap-2">
             <button
               type="button"
@@ -840,22 +690,6 @@ export default function App() {
               aria-label="Open onboarding interactive guide"
             >
               <HelpCircle className="w-4 h-4 text-[#ff4522]" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                hapticFeedback.light();
-                setShowBrandDeck(true);
-              }}
-              className="w-9 h-9 inline-flex items-center justify-center rounded-full border border-[#25293a] bg-[#11131f]/60 hover:bg-[#11131f] text-[#b7bdd5] hover:text-white transition-all cursor-pointer hover:border-[#ff4522]/50 active:scale-95"
-              title="DRIFT Brand Showroom (Option 2a)"
-              aria-label="Open DRIFT brand deck"
-            >
-              <div className="relative w-4 h-4 flex items-center justify-center">
-                <div className="absolute inset-0 w-3 h-3 border border-[#3A4160] rounded-[2px]" />
-                <div className="absolute w-1.5 h-1.5 bg-[#FF4522] rounded-[1px] right-[1px] bottom-[1px] shadow-sm shadow-[#FF4522]/50" />
-              </div>
             </button>
           </div>
 
@@ -1316,10 +1150,8 @@ export default function App() {
                   lng={lng} 
                   radius={radius} 
                   places={visibleShown} 
-                  accentColor={activeCategory.color} 
-                  deviceHeading={deviceHeading}
+                  accentColor={activeCategory.color}
                   isCollapsed={isMapCollapsed}
-                  onResetCompass={handleResetCompass}
                 />
               </div>
             </div>
@@ -1723,157 +1555,6 @@ export default function App() {
                 className="px-5 py-2.5 bg-[#ff4522] hover:bg-[#ff5c3d] text-white font-sans font-bold text-xs rounded-xl transition-all cursor-pointer active:scale-95"
               >
                 {onboardingStep === 3 ? 'Get Drifting!' : 'Next'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Brand Identity Showroom Modal (Option 2a) */}
-      {showBrandDeck && (
-        <div 
-          id="brand-deck-overlay" 
-          className="fixed inset-0 bg-black/90 backdrop-blur-md z-[200] transition-opacity duration-300 flex items-center justify-center p-4 overflow-y-auto"
-        >
-          <div 
-            className="w-full max-w-2xl bg-[#090A10] border-2 border-[#ff4522]/30 rounded-3xl p-6 md:p-8 shadow-[0_0_80px_rgba(255,69,34,0.15)] flex flex-col gap-6 relative animate-fadeIn max-h-[90vh] overflow-y-auto"
-          >
-            {/* Header / Brand Agency Vibe */}
-            <div className="flex items-start justify-between border-b border-[#25293a] pb-4">
-              <div>
-                <span className="font-mono text-[9px] bg-[#FF4522]/10 border border-[#FF4522]/30 text-[#FF4522] px-2.5 py-1 rounded-full font-bold uppercase tracking-widest">
-                  Brand Presentation • Option 2a
-                </span>
-                <h2 className="font-sans font-black text-2xl text-white mt-2">DRIFT Brand Identity</h2>
-                <p className="text-xs text-[#7e84a3] mt-0.5 font-mono">"Live where you land." — One mark, one trick, one line.</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  hapticFeedback.light();
-                  setShowBrandDeck(false);
-                }}
-                className="w-8 h-8 rounded-full border border-[#25293a] bg-[#11131f] hover:bg-[#ff4522] text-[#b7bdd5] hover:text-white flex items-center justify-center transition-all cursor-pointer font-bold text-sm"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Deck Content Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-sans">
-              
-              {/* Left Column: Philosophical Pitch */}
-              <div className="flex flex-col gap-4">
-                <div className="bg-[#11131f]/60 border border-[#25293a] p-4 rounded-2xl">
-                  <h3 className="font-bold text-sm text-white mb-1.5 flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#FF4522]" />
-                    The Narrative Hook
-                  </h3>
-                  <p className="text-xs text-[#b7bdd5] leading-relaxed">
-                    Every travel app uses a <strong>pin, globe, or compass</strong>. DRIFT's winning move is to look like <em>exploration</em>, not rigid navigation. This system is designed around the idea of a map tile slipping its grid — <strong>literally the product story</strong> of landing somewhere and living offline.
-                  </p>
-                </div>
-
-                <div className="bg-[#11131f]/60 border border-[#25293a] p-4 rounded-2xl">
-                  <h3 className="font-bold text-sm text-white mb-1.5 flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#3A4160]" />
-                    Brand Asset System
-                  </h3>
-                  <ul className="text-xs text-[#b7bdd5] space-y-2 list-disc list-inside">
-                    <li><strong className="text-white">1a (Drifted Square)</strong>: The ownable master mark. Built to animate cleanly.</li>
-                    <li><strong className="text-white">1d (The Highlighted I)</strong>: A wordmark trick representing "you are here".</li>
-                    <li><strong className="text-white">The Tagline</strong>: "Live where you land." under both.</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Right Column: Visual Mockups */}
-              <div className="flex flex-col gap-4">
-                
-                {/* 1. App Icon Mock (iOS Squircle style) */}
-                <div className="bg-[#11131f]/60 border border-[#25293a] p-4 rounded-2xl flex flex-col items-center justify-center">
-                  <span className="font-mono text-[9px] text-[#5b6075] uppercase tracking-wider mb-2 font-bold">1. iOS App Icon Mock (1024×1024 Scale)</span>
-                  
-                  {/* iOS App Icon container */}
-                  <div className="w-24 h-24 rounded-[22px] bg-[#090A10] border border-neutral-800 shadow-2xl flex items-center justify-center relative overflow-hidden group hover:scale-105 transition-transform duration-300">
-                    {/* Grid mesh backdrop */}
-                    <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#3a4160_1px,transparent_1px),linear-gradient(to_bottom,#3a4160_1px,transparent_1px)] bg-[size:12px_12px]" />
-                    
-                    {/* Master logo */}
-                    <div className="relative w-14 h-14 flex items-center justify-center">
-                      {/* Outline square */}
-                      <div className="absolute w-10 h-10 border-[3px] border-[#3A4160] rounded-lg" />
-                      {/* Sliding orange tile */}
-                      <div className="absolute w-5 h-5 bg-[#FF4522] rounded-[3px] right-1.5 bottom-1.5 shadow-lg shadow-[#FF4522]/50 animate-bounce" />
-                    </div>
-                  </div>
-                  <span className="text-[10px] text-[#7e84a3] mt-2 font-mono">Ownable grid-drift icon</span>
-                </div>
-
-                {/* 2. Splash Screen / Motion Asset Demo */}
-                <div className="bg-[#11131f]/60 border border-[#25293a] p-4 rounded-2xl flex flex-col items-center">
-                  <span className="font-mono text-[9px] text-[#5b6075] uppercase tracking-wider mb-2 font-bold">2. Splash Screen Motion Demo</span>
-                  
-                  {/* Mini smartphone splash demo frame */}
-                  <div className="w-full h-28 rounded-xl bg-[#090A10] border border-[#25293a] relative overflow-hidden flex flex-col items-center justify-center">
-                    {/* Infinite drifting logo */}
-                    <div className="relative w-12 h-12 flex items-center justify-center">
-                      <div className="absolute w-8 h-8 border-2 border-[#3A4160] rounded-md" />
-                      {/* Dynamic drifting animation */}
-                      <div 
-                        className="absolute w-4.5 h-4.5 bg-[#FF4522] rounded-[2.5px] shadow-lg shadow-[#FF4522]/40"
-                        style={{
-                          animation: 'splashDrift 4s ease-in-out infinite'
-                        }}
-                      />
-                    </div>
-                    <span className="text-[10px] font-black text-white tracking-wide mt-1.5">
-                      DR<span className="text-[#FF4522]">I</span>FT
-                    </span>
-                    <span className="text-[7px] text-[#7e84a3] font-mono tracking-wider uppercase mt-0.5">Live where you land.</span>
-
-                    <style>{`
-                      @keyframes splashDrift {
-                        0%, 100% { transform: translate(0px, 0px); }
-                        50% { transform: translate(6px, 6px); }
-                      }
-                    `}</style>
-                  </div>
-                  <span className="text-[10px] text-[#7e84a3] mt-2 font-mono">Animated intro sequence logo state</span>
-                </div>
-
-              </div>
-            </div>
-
-            {/* Full brand lockup banner */}
-            <div className="bg-[#11131f] border border-[#25293a] rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-              <span className="font-mono text-[9px] text-[#5b6075] uppercase tracking-wider mb-3.5 font-bold">3. Combined Identity Lockup (Option 2a)</span>
-              
-              <div className="flex items-center gap-3 select-none">
-                <div className="relative w-10 h-10 flex items-center justify-center">
-                  <div className="absolute w-7 h-7 border-2 border-[#3A4160] rounded-md" />
-                  <div className="absolute w-3.8 h-3.8 bg-[#FF4522] rounded-[2px] right-0.5 bottom-0.5 shadow-md shadow-[#FF4522]/50" />
-                </div>
-                <h2 className="text-4xl font-black font-sans tracking-tight leading-none text-white">
-                  DR<span className="text-[#FF4522] relative inline-block">I<span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#FF4522] rounded-full animate-ping" /></span>FT
-                </h2>
-              </div>
-              <p className="font-mono text-[11px] text-[#7e84a3] mt-2 tracking-widest uppercase font-bold">
-                Live where you land.
-              </p>
-            </div>
-
-            {/* CTA action */}
-            <div className="flex items-center justify-end pt-3 border-t border-[#25293a]/50">
-              <button
-                type="button"
-                onClick={() => {
-                  hapticFeedback.light();
-                  setShowBrandDeck(false);
-                }}
-                className="px-5 py-2.5 bg-[#ff4522] hover:bg-[#ff5c3d] text-white font-sans font-bold text-xs rounded-xl transition-all cursor-pointer active:scale-95"
-              >
-                Close Showroom
               </button>
             </div>
           </div>
