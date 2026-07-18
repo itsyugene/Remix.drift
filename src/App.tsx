@@ -814,8 +814,13 @@ export default function App() {
   const error = status === 'error';
 
   return (
-    <div className="relative min-h-screen flex flex-col justify-start items-center overflow-hidden px-4 pt-[env(safe-area-inset-top,18px)] pb-[env(safe-area-inset-bottom,40px)] bg-[#10111A] text-white">
-      {/* Ambient glow removed — flat design */}
+    <div className="relative min-h-screen flex flex-col justify-start items-center overflow-hidden px-4 pt-[env(safe-area-inset-top,18px)] pb-[env(safe-area-inset-bottom,40px)] bg-gradient-to-b from-[#090a10] to-[#10111a] text-white">
+      {/* v3 signature: blurred radial glow behind the header in the active category color */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-[-120px] left-1/2 -translate-x-1/2 w-[420px] max-w-[92vw] h-[300px] rounded-full blur-[70px] z-0 transition-colors duration-500"
+        style={{ background: `radial-gradient(circle, ${activeCategory.color}55, transparent 70%)` }}
+      />
 
       <div className="relative z-10 w-full max-w-[520px] md:max-w-4xl lg:max-w-6xl flex flex-col transition-all duration-300">
         {/* Header */}
@@ -1576,11 +1581,11 @@ export default function App() {
                   className="animate-stagger-fade"
                   style={{ animationDelay: `${index * 30}ms` }}
                 >
-                  <PlaceCard 
-                    place={place} 
-                    userLat={lat!} 
-                    userLng={lng!} 
-                    deviceHeading={deviceHeading}
+                  <PlaceCard
+                    place={place}
+                    userLat={lat!}
+                    userLng={lng!}
+                    accentColor={activeCategory.color}
                     onChange={handleFeedbackChange}
                   />
                 </div>
