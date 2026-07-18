@@ -884,6 +884,9 @@ export default function App() {
                 {isMorning ? `morning drift` : `night drift`}
               </span>
             </p>
+
+            {/* Subtitle — honest, plain-language description */}
+            <p className="text-xs text-[#9ca3c6] mt-1">What's open, near, and now — live from OpenStreetMap.</p>
           </div>
 
           {/* Share Deep Link button */}

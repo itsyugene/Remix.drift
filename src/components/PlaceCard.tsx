@@ -24,12 +24,15 @@ export default function PlaceCard({ place, userLat, userLng, accentColor, onChan
 
   let hoursText = 'Hours not mapped in OSM';
   let hoursColor = '#9a9684';
+  let hoursDot = ''; // filled ● when open, hollow ○ when closed, none otherwise
   if (hours.state === 'open') {
     hoursText = hours.always ? 'Open 24/7' : `Open — closes ${formatHM(hours.until || 0)}`;
     hoursColor = '#1f8a4c';
+    hoursDot = '●';
   } else if (hours.state === 'closed') {
     hoursText = hours.next !== null ? `Closed — opens ${formatHM(hours.next || 0)}` : 'Closed today';
     hoursColor = '#b3402f';
+    hoursDot = '○';
   } else if (hours.state === 'unknown') {
     const raw = place.tags.opening_hours || '';
     const abbr = raw.length > 35 ? `${raw.slice(0, 32)}...` : raw;
@@ -87,6 +90,7 @@ export default function PlaceCard({ place, userLat, userLng, accentColor, onChan
       </div>
 
       <p className="text-[0.78rem] mt-1.5 font-bold" style={{ color: hoursColor }}>
+        {hoursDot && <span aria-hidden="true">{hoursDot} </span>}
         {hoursText}
       </p>
 
