@@ -1,6 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <rect width="512" height="512" rx="112" fill="#090a10"/>
-  <!-- 1a Master Mark: Rounded square outline in slate blue-grey with smaller solid orange rounded square drifting out of bottom-right -->
-  <rect x="120" y="120" width="220" height="220" rx="36" fill="none" stroke="#3a4160" stroke-width="24"/>
-  <rect x="250" y="250" width="140" height="140" rx="24" fill="#ff4522"/>
+<!-- DRIFT — Skid Tile app icon (a map tile slipping its grid, leaving a skid) -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="DRIFT app icon — skid tile">
+  <rect width="512" height="512" rx="112" fill="#0b0c12"/>
+  <rect x="118" y="118" width="180" height="180" rx="36" fill="none" stroke="#3a4160" stroke-width="26"/>
+  <path d="M160 340c50 4 74-14 106-46" fill="none" stroke="#2ec4b6" stroke-width="24" stroke-linecap="round" opacity="0.45"/>
+  <path d="M196 376c58 2 88-22 122-60" fill="none" stroke="#2ec4b6" stroke-width="24" stroke-linecap="round"/>
+  <rect x="288" y="266" width="116" height="116" rx="26" fill="#ff4522"/>
 </svg>

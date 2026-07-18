@@ -862,11 +862,13 @@ export default function App() {
           {/* Core Brand Lockup (Option 1a + Option 1d combined) */}
           <div className="flex flex-col items-center justify-center">
             <div className="inline-flex items-center gap-2.5 justify-center select-none">
-              {/* 1a Brand Mark: map tile sliding/drifting */}
-              <div className="relative w-8 h-8 flex items-center justify-center">
-                <div className="absolute w-5.5 h-5.5 border-2 border-[#3A4160] rounded-md" />
-                <div className="absolute w-3 h-3 bg-[#FF4522] rounded-[2px] right-0.5 bottom-0.5 animate-logo-drift" />
-              </div>
+              {/* 1a Brand Mark: Skid Tile — a map tile slipping its grid */}
+              <svg viewBox="0 0 512 512" className="w-9 h-9 shrink-0" role="img" aria-label="DRIFT">
+                <rect x="118" y="118" width="180" height="180" rx="36" fill="none" stroke="#3a4160" strokeWidth="26" />
+                <path d="M160 340c50 4 74-14 106-46" fill="none" stroke="#2ec4b6" strokeWidth="24" strokeLinecap="round" opacity="0.45" />
+                <path d="M196 376c58 2 88-22 122-60" fill="none" stroke="#2ec4b6" strokeWidth="24" strokeLinecap="round" />
+                <rect x="288" y="266" width="116" height="116" rx="26" fill="#ff4522" />
+              </svg>
 
               {/* 1d Wordmark: "DRIFT" with orange "I" acting as 'you are here' indicator */}
               <h1 className="text-3xl font-black font-sans tracking-tight leading-none text-white select-none">
