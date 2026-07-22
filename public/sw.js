@@ -1,4 +1,4 @@
-const CACHE_NAME = "drift-v2.2";
+const CACHE_NAME = "drift-v2.3";
 
 const PRECACHE_ASSETS = [
   "/",
@@ -349,6 +349,32 @@ self.addEventListener("fetch", (event) => {
       return;
     }
 
+    // HTML navigations: NETWORK-FIRST so a new deploy loads immediately and
+    // returning visitors never get stuck on a stale/blank cached shell.
+    // Fall back to the cached shell only when the network is unavailable.
+    if (event.request.mode === "navigate") {
+      event.respondWith(
+        (async () => {
+          try {
+            const fresh = await fetch(event.request);
+            if (fresh && fresh.ok) {
+              const cache = await caches.open(CACHE_NAME);
+              cache.put("/index.html", fresh.clone());
+              return fresh;
+            }
+            throw new Error(`nav status ${fresh && fresh.status}`);
+          } catch (err) {
+            const cache = await caches.open(CACHE_NAME);
+            return (await cache.match(event.request)) || (await cache.match("/index.html")) || Response.error();
+          }
+        })()
+      );
+      return;
+    }
+
+    // Hashed assets (/assets/*), icon, manifest: stale-while-revalidate.
+    // Safe because every Vite build emits new filenames, so this never serves
+    // a wrong version of a changed file.
     event.respondWith(
       caches.open(CACHE_NAME).then(async (cache) => {
         const cached = await cache.match(event.request);
@@ -357,13 +383,7 @@ self.addEventListener("fetch", (event) => {
             cache.put(event.request, response.clone());
           }
           return response;
-        }).catch(() => {
-          // If navigation fails, fallback to index.html shell
-          if (event.request.mode === "navigate") {
-            return cache.match("/index.html");
-          }
-          return cached;
-        });
+        }).catch(() => cached);
         return cached || fetchPromise;
       })
     );
