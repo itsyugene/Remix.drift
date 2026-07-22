@@ -209,7 +209,6 @@ async function startServer() {
     // Sparser classes (thrill, parks, museums) use around:2000 to remain light and fast. Very common food places use around:1200 to prevent dense cities from exceeding limits.
     const query =
       `[out:json][timeout:20];(` +
-      `nwr["amenity"="toilets"](around:2000,${snappedLat},${snappedLng});` +
       `nwr["amenity"~"^(brothel|casino|stripclub|strip_club|love_hotel|lovehotel|cabaret|swinger_club|swingerclub|pub|bar|nightclub|arts_centre|coffeeshop)$"](around:2000,${snappedLat},${snappedLng});` +
       `nwr["leisure"~"^(casino|gambling|adult_gaming_centre)$"](around:2000,${snappedLat},${snappedLng});` +
       `nwr["shop"~"^(massage|sex|erotic|adult|cannabis|marijuana|coffeeshop)$"](around:2000,${snappedLat},${snappedLng});` +
