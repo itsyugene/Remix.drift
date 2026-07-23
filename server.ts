@@ -16,7 +16,7 @@ const OVERPASS_MIRRORS = [
 ];
 
 // Comply with OSM User-Agent policies
-const CUSTOM_USER_AGENT = 'DRIFT/2.1 (multimotika@gmail.com; https://ais-pre-4x6xrlz3brw35weqqsy447-468294958519.europe-west3.run.app)';
+const CUSTOM_USER_AGENT = 'DRIFT/2.1 (ksuclasses16@yahoo.com; https://remix-drift.onrender.com)';
 
 // In-Memory Rate Limiter Map (per IP)
 const ipRequestCounts = new Map<string, { count: number; resetAt: number }>();
