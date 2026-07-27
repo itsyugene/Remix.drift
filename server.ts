@@ -10,10 +10,10 @@ const GEOCODER_URL = 'https://photon.komoot.io/api/';
 // Ordered most-permissive-first. Public overpass-api.de commonly blocks
 // datacenter IPs (like Render's), so cloud-friendlier mirrors lead.
 const OVERPASS_MIRRORS = [
+  'https://overpass.osm.ch/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
   'https://overpass.private.coffee/api/interpreter',
   'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
-  'https://overpass.kumi.systems/api/interpreter',
-  'https://overpass.osm.ch/api/interpreter',
   'https://overpass-api.de/api/interpreter'
 ];
 
@@ -346,7 +346,7 @@ async function startServer() {
         results.push({
           url,
           reachable: false,
-          error: err.name === 'AbortError' ? 'Timeout (4s)' : err.message || 'Fetch failed',
+          error: err.name === 'AbortError' ? 'Timeout (8s)' : err.message || 'Fetch failed',
           latencyMs
         });
       } finally {
