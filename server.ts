@@ -7,12 +7,14 @@ const PORT = Number(process.env.PORT) || 3000;
 
 // Upstream URLs
 const GEOCODER_URL = 'https://photon.komoot.io/api/';
+// Ordered most-permissive-first. Public overpass-api.de commonly blocks
+// datacenter IPs (like Render's), so cloud-friendlier mirrors lead.
 const OVERPASS_MIRRORS = [
-  'https://overpass-api.de/api/interpreter',
-  'https://lz4.overpass-api.de/api/interpreter',
-  'https://z.overpass-api.de/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
-  'https://overpass.nchc.org.tw/api/interpreter'
+  'https://overpass.osm.ch/api/interpreter',
+  'https://overpass-api.de/api/interpreter'
 ];
 
 // Comply with OSM User-Agent policies
@@ -236,7 +238,7 @@ async function startServer() {
     // Try Overpass Mirrors in sequence
     for (const url of mirrorsToTry) {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds timeout for fast failover
+      const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s query timeout
 
       try {
         console.log(`[UPSTREAM FETCH] Attempting fetch to ${url}...`);
@@ -308,7 +310,7 @@ async function startServer() {
     for (const url of OVERPASS_MIRRORS) {
       const startTime = performance.now();
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s fast ping timeout
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s ping timeout (free tier is slow)
 
       try {
         const pingUrl = `${url}?data=%5Bout%3Ajson%5D%5Btimeout%3A3%5D%3Bout%3B`;
