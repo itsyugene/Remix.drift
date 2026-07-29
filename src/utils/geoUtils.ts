@@ -283,123 +283,82 @@ export async function fetchPlacesFromProxy(lat: number, lng: number): Promise<an
     }
   }
 
-  // Not in cache or expired, fetch from API
+  // Not in cache or expired — query OpenStreetMap DIRECTLY from the browser.
+  // Public Overpass mirrors serve residential/mobile IPs happily but block the
+  // datacenter IPs a cloud proxy would use, so we go direct. No fabricated
+  // fallbacks: if every mirror fails we throw and the UI shows an honest error.
   const OVERPASS_MIRRORS = [
     'https://overpass-api.de/api/interpreter',
-    'https://lz4.overpass-api.de/api/interpreter',
-    'https://z.overpass-api.de/api/interpreter',
+    'https://overpass.private.coffee/api/interpreter',
     'https://overpass.kumi.systems/api/interpreter',
-    'https://overpass.nchc.org.tw/api/interpreter'
+    'https://maps.mail.ru/osm/tools/overpass/api/interpreter'
   ];
 
-  let preferredMirror: string | null = null;
-  if (typeof window !== 'undefined' && window.localStorage) {
-    try {
-      const storedPref = localStorage.getItem('drift_preferred_mirror');
-      if (storedPref && storedPref !== 'auto') {
-        preferredMirror = storedPref;
-      } else {
-        preferredMirror = localStorage.getItem('drift_fastest_mirror_cache');
-      }
-    } catch (e) {
-      console.warn('[LOCAL STORAGE PREF READ ERROR]', e);
-    }
-  }
-
-  // Build a prioritized sequence of mirrors to try
-  const mirrorsToTry: (string | null)[] = [];
-  if (preferredMirror && OVERPASS_MIRRORS.includes(preferredMirror)) {
-    mirrorsToTry.push(preferredMirror);
-  } else {
-    mirrorsToTry.push(null); // 'auto' (backend choice) first
-  }
-
-  // Append other mirrors to try sequentially as fallbacks
-  for (const m of OVERPASS_MIRRORS) {
-    if (m !== preferredMirror) {
-      mirrorsToTry.push(m);
-    }
-  }
-
-  // If we had a preferred mirror, append null (auto) to the end as a final catch-all attempt
-  if (preferredMirror) {
-    mirrorsToTry.push(null);
-  }
+  const query =
+    `[out:json][timeout:25];(` +
+    `nwr["amenity"~"^(brothel|casino|stripclub|strip_club|love_hotel|lovehotel|cabaret|swinger_club|swingerclub|pub|bar|nightclub|arts_centre|coffeeshop)$"](around:2000,${lat},${lng});` +
+    `nwr["leisure"~"^(casino|gambling|adult_gaming_centre)$"](around:2000,${lat},${lng});` +
+    `nwr["shop"~"^(massage|sex|erotic|adult|cannabis|marijuana|coffeeshop)$"](around:2000,${lat},${lng});` +
+    `nwr["leisure"~"^(park|garden)$"](around:2000,${lat},${lng});` +
+    `nwr["tourism"~"^(museum|gallery|viewpoint|art_gallery|arts_centre)$"](around:2000,${lat},${lng});` +
+    `nwr["amenity"~"^(cafe|restaurant|fast_food|marketplace|bakery)$"](around:1200,${lat},${lng});` +
+    `nwr["shop"="bakery"](around:1200,${lat},${lng});` +
+    `);out center tags 1200;`;
+  const requestBody = new URLSearchParams({ data: query }).toString();
 
   let lastError: Error | null = null;
-  const maxAttempts = mirrorsToTry.length;
-  const baseDelayMs = 500; // base exponential delay start
 
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const currentMirror = mirrorsToTry[attempt];
+  for (let attempt = 0; attempt < OVERPASS_MIRRORS.length; attempt++) {
+    const mirror = OVERPASS_MIRRORS[attempt];
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     try {
       if (attempt > 0) {
-        // Calculate exponential backoff: 500ms, 1000ms, 2000ms... with ±20% jitter
-        const delay = baseDelayMs * Math.pow(2, attempt - 1) * (0.8 + Math.random() * 0.4);
-        console.warn(`%c[RETRY BACKOFF] Attempt ${attempt} failed. Retrying in ${Math.round(delay)}ms using mirror: ${currentMirror || 'auto (dynamic)'}`, 'color: #ffaa00; font-weight: bold;');
+        const delay = 500 * Math.pow(2, attempt - 1) * (0.8 + Math.random() * 0.4);
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
 
-      const response = await fetch("/api/places", {
+      const response = await fetch(mirror, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json"
-        },
-        body: JSON.stringify({ 
-          lat, 
-          lng,
-          preferredMirror: currentMirror || undefined
-        })
+        headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
+        body: requestBody,
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`overpass-http-${response.status}`);
       }
 
       const json = await response.json();
-
       if (!json || !Array.isArray(json.elements)) {
         throw new Error("overpass-bad");
       }
 
-      // Override source for badge mapping: served from API directly -> 'network' ('Live')
       json.source = 'network';
 
-      // Save to localStorage cache
       if (typeof window !== 'undefined' && window.localStorage) {
         try {
-          localStorage.setItem(cacheKey, JSON.stringify({
-            timestamp: Date.now(),
-            data: json
-          }));
+          localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: json }));
         } catch (e) {
           console.warn('[LOCAL STORAGE CACHE WRITE ERROR]', e);
         }
       }
 
       const duration = Math.round(performance.now() - startTime);
-
-      // Diagnostic Log Summary
       console.log(
-        `%c[DRIFT DIAGNOSTIC] Place data retrieved successfully!
- • Snapping Target Grid: (${snapLat}, ${snapLng})
- • Upstream Query Source: API (LIVE)
- • Routed Mirror: ${json.routedMirror || currentMirror || 'auto'}
- • Retry Attempts: ${attempt}
- • Execution Time: ${duration}ms
- • Elements Loaded: ${json.elements.length}`,
+        `%c[DRIFT] Overpass OK via ${mirror} — ${json.elements.length} elements in ${duration}ms`,
         "color: #4cc47e; font-weight: bold; background: #0c2015; padding: 4px; border-radius: 4px;"
       );
 
       return json;
-
     } catch (err: any) {
-      console.error(`[RETRY BACKOFF] Attempt ${attempt + 1}/${maxAttempts} failed:`, err.message);
+      clearTimeout(timeoutId);
+      console.warn(`[DRIFT] Overpass mirror failed (${mirror}): ${err && err.message}`);
       lastError = err;
     }
   }
 
-  throw lastError || new Error("All Overpass mirror queries failed");
+  throw new Error("overpass-net");
 }
