@@ -296,13 +296,13 @@ export async function fetchPlacesFromProxy(lat: number, lng: number): Promise<an
 
   const query =
     `[out:json][timeout:25];(` +
-    `nwr["amenity"~"^(brothel|casino|stripclub|strip_club|love_hotel|lovehotel|cabaret|swinger_club|swingerclub|pub|bar|nightclub|arts_centre|coffeeshop)$"](around:2000,${lat},${lng});` +
-    `nwr["leisure"~"^(casino|gambling|adult_gaming_centre)$"](around:2000,${lat},${lng});` +
-    `nwr["shop"~"^(massage|sex|erotic|adult|cannabis|marijuana|coffeeshop)$"](around:2000,${lat},${lng});` +
-    `nwr["leisure"~"^(park|garden)$"](around:2000,${lat},${lng});` +
-    `nwr["tourism"~"^(museum|gallery|viewpoint|art_gallery|arts_centre)$"](around:2000,${lat},${lng});` +
-    `nwr["amenity"~"^(cafe|restaurant|fast_food|marketplace|bakery)$"](around:1200,${lat},${lng});` +
-    `nwr["shop"="bakery"](around:1200,${lat},${lng});` +
+    `nwr["amenity"~"^(brothel|casino|stripclub|strip_club|love_hotel|lovehotel|cabaret|swinger_club|swingerclub|pub|bar|nightclub|arts_centre|coffeeshop)$"](around:4000,${lat},${lng});` +
+    `nwr["leisure"~"^(casino|gambling|adult_gaming_centre)$"](around:4000,${lat},${lng});` +
+    `nwr["shop"~"^(massage|sex|erotic|adult|cannabis|marijuana|coffeeshop)$"](around:4000,${lat},${lng});` +
+    `nwr["leisure"~"^(park|garden)$"](around:4000,${lat},${lng});` +
+    `nwr["tourism"~"^(museum|gallery|viewpoint|art_gallery|arts_centre)$"](around:4000,${lat},${lng});` +
+    `nwr["amenity"~"^(cafe|restaurant|fast_food|marketplace|bakery)$"](around:4000,${lat},${lng});` +
+    `nwr["shop"="bakery"](around:4000,${lat},${lng});` +
     `);out center tags 1200;`;
   const requestBody = new URLSearchParams({ data: query }).toString();
 
