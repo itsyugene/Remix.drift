@@ -36,11 +36,13 @@ import {
   RefreshCw,
   AlertTriangle,
   Zap,
-  Globe
+  Globe,
+  Flame
 } from 'lucide-react';
 import { hapticFeedback } from './utils/haptic.ts';
 import { HUBS, buildDemoElements } from './lib/demoHubs.ts';
 import { getFeedback } from './lib/feedback.ts';
+import { getLedger, subscribe } from './lib/driftPoints.ts';
 // Firebase auth/cloud-sync removed - DRIFT is fully local (localStorage only).
 
 const CATEGORIES = [
@@ -68,7 +70,22 @@ export default function App() {
   const handleFeedbackChange = () => {
     setFeedbackUpdateTrigger(prev => prev + 1);
   };
-  
+
+  // Off-chain "drift" points ledger (device-local; see lib/driftPoints.ts).
+  const [drift, setDrift] = useState<{ balance: number; streak: number }>({ balance: 0, streak: 0 });
+  useEffect(() => {
+    const sync = () => {
+      const l = getLedger();
+      setDrift({ balance: l.balance, streak: l.streak });
+    };
+    sync();
+    return subscribe(sync);
+  }, []);
+  const handleDriftEarned = () => {
+    const l = getLedger();
+    setDrift({ balance: l.balance, streak: l.streak });
+  };
+
   const [radius, setRadius] = useState<number>(4000);
   const [openOnly, setOpenOnly] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -725,6 +742,21 @@ export default function App() {
 
           {/* Share Deep Link button */}
           <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1.5 sm:gap-2">
+            {/* drift points — off-chain, device-local score */}
+            <div
+              className="inline-flex items-center gap-1 rounded-full border border-[#25293a] bg-[#11131f]/60 px-2.5 h-9 select-none"
+              title={`${drift.balance} drift earned on this device${drift.streak > 0 ? ` · ${drift.streak}-day streak` : ''} — local only, not a token`}
+              aria-label={`${drift.balance} drift points earned`}
+            >
+              <span className="inline-block w-2 h-2 rounded-full bg-[#ff4522]" aria-hidden="true" />
+              <span className="font-mono text-[12px] font-bold text-white tabular-nums">{drift.balance}</span>
+              {drift.streak > 0 && (
+                <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-[#ff9f1c] ml-0.5">
+                  <Flame className="w-3 h-3" />
+                  {drift.streak}
+                </span>
+              )}
+            </div>
             <button
               type="button"
               onClick={handleShare}
@@ -1423,7 +1455,9 @@ export default function App() {
                     userLat={lat!}
                     userLng={lng!}
                     accentColor={activeCategory.color}
+                    vibe={currentTab}
                     onChange={handleFeedbackChange}
+                    onEarned={handleDriftEarned}
                   />
                 </div>
               ))}

@@ -3,19 +3,23 @@ import { parseHours, formatHM } from '../utils/hoursParser.ts';
 import { getCompassDirection, formatDistance } from '../utils/geoUtils.ts';
 import { FeedbackControls } from './FeedbackControls.tsx';
 import { getFeedback } from '../lib/feedback.ts';
+import CheckinButton from './CheckinButton.tsx';
+import type { Vibe } from '../lib/driftPoints.ts';
 
 interface PlaceCardProps {
   place: Place;
   userLat: number;
   userLng: number;
   accentColor: string; // active category color — drives the card's top border
+  vibe: Vibe;          // active tab — drives the check-in reward multiplier
   onChange?: () => void;
+  onEarned?: () => void; // a check-in landed — refresh the header points badge
 }
 
 // DRIFT v3 card: a light "cream" card on the dark page, colored top-border in the
 // active category color. Bearing arrow points TRUE north-relative (no device
 // sensor). Deliberately nimble — no target-lock/sound/report clutter.
-export default function PlaceCard({ place, userLat, userLng, accentColor, onChange }: PlaceCardProps) {
+export default function PlaceCard({ place, userLat, userLng, accentColor, vibe, onChange, onEarned }: PlaceCardProps) {
   const hours = parseHours(place.tags.opening_hours);
 
   const feedback = getFeedback(place.osmType, place.osmId);
@@ -114,6 +118,8 @@ export default function PlaceCard({ place, userLat, userLng, accentColor, onChan
           Directions ↗
         </a>
       </div>
+
+      <CheckinButton place={place} vibe={vibe} accentColor={accentColor} onEarned={onEarned} />
 
       <FeedbackControls osmType={place.osmType} osmId={place.osmId} placeName={place.name} onChange={onChange} />
     </article>
